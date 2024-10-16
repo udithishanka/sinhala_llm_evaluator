@@ -1,0 +1,31 @@
+Metadata-Version: 2.1
+Name: sinhala_llm_evaluator
+Version: 0.1.0
+Summary: A module for evaluating language models during training
+Home-page: https://github.com/udithishanka
+Author: Udith Ishanka
+Author-email: udithishanka.s@gmail.com
+License: MIT
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+Requires-Dist: torch
+Requires-Dist: transformers
+Requires-Dist: datasets
+Requires-Dist: evaluate
+Requires-Dist: numpy
+Requires-Dist: nltk
+Requires-Dist: absl-py
+Requires-Dist: rouge-score
+Requires-Dist: scikit-learn
+
+# llm_evaluator
+
+`llm_evaluator` is a Python package that provides tools for evaluating language models during training.
+
+## Installation
+
+```bash
+pip install llm_evaluator
