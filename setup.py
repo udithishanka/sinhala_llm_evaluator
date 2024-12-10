@@ -1,8 +1,8 @@
 from setuptools import setup, find_packages
 
 setup(
-    name="sinhala_llm_evaluator",  # Your package name
-    version="0.1.0",  # Initial version
+    name="sinhala_llm_evaluator",
+    version="0.2.0",  
     description="A module for evaluating language models during training",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
