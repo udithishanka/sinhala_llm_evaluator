@@ -1,0 +1,9 @@
+sinhala_llm_evaluator.egg-info
+dist
+.venv
+__pycache__
+*.pyc
+*.pyo
+pyproject.toml
+bash.sh
+
