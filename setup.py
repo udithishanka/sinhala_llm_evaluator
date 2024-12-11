@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="sinhala_llm_evaluator",
-    version="0.2.1",  
+    version="0.2.3",  
     description="A module for evaluating language models during training",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
