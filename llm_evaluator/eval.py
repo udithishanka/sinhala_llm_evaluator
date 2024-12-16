@@ -56,12 +56,14 @@ def evaluate_model(dataset_name, model_name, subset_size=5):
         accuracy_metric = evaluate.load("accuracy")
         f1_metric = evaluate.load("f1")
 
+        # Generate binary labels for predictions
         true_labels = [1 if pred == ref else 0 for pred, ref in zip(predictions, references)]
-        
+
+        # Use binary classification metrics
         precision = precision_metric.compute(predictions=true_labels, references=[1] * len(true_labels))
-        recall = recall_metric.compute(predictions=true_labels, references=[1] * len(true_labels))
+        recall = recall_metric.compute(predictions=true_labels, references=[1] * len(true_labels))   
         accuracy = accuracy_metric.compute(predictions=true_labels, references=[1] * len(true_labels))
-        f1 = f1_metric.compute(predictions=true_labels, references=[1] * len(true_labels))
+        f1 = f1_metric.compute(predictions=true_labels, references=[1] * len(true_labels))           
 
         return {
             "precision": precision,
