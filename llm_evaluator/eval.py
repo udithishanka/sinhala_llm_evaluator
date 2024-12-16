@@ -3,13 +3,24 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from datasets import load_dataset
 import evaluate
 import numpy as np
+import time
 
-def evaluate_model(dataset_name, model_name, subset_size=5):
-    # Load model and tokenizer
+def evaluate_model(dataset_name, model_name, max_length=512, subset_size=5):
+    """_summary_
+
+    Args:
+        dataset_name (_type_): _description_
+        model_name (_type_): _description_
+        max_length (int, optional): _description_. Defaults to 512.
+        subset_size (int, optional): _description_. Defaults to 5.
+
+    Returns:
+        _type_: _description_
+    """
+    start_time = time.time()
+    
     model = AutoModelForCausalLM.from_pretrained(model_name)
     tokenizer = AutoTokenizer.from_pretrained(model_name)
-
-    # Load dataset
     dataset = load_dataset(dataset_name)
     
     # Prepare dataset inputs
@@ -18,7 +29,7 @@ def evaluate_model(dataset_name, model_name, subset_size=5):
             examples["question"], 
             truncation=True, 
             padding="max_length", 
-            max_length=512, 
+            max_length=max_length, 
             return_tensors="pt"
         )
 
@@ -27,13 +38,14 @@ def evaluate_model(dataset_name, model_name, subset_size=5):
 
     # Generate predictions
     def generate_predictions(batch):
+        print("Generating predictions...")
         input_ids = torch.tensor(batch['input_ids']).to(model.device)
         attention_mask = torch.tensor(batch['attention_mask']).to(model.device)
         with torch.no_grad():
             outputs = model.generate(
                 input_ids=input_ids, 
                 attention_mask=attention_mask, 
-                max_length=700
+                max_length=max_length
             )
         return tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
@@ -50,33 +62,39 @@ def evaluate_model(dataset_name, model_name, subset_size=5):
         return bleu_metric.compute(predictions=predictions, references=[[ref] for ref in references])
 
     # Compute classification metrics
-    def compute_classification_metrics(predictions, references):
-        precision_metric = evaluate.load("precision")
-        recall_metric = evaluate.load("recall")
-        accuracy_metric = evaluate.load("accuracy")
-        f1_metric = evaluate.load("f1")
+    # def compute_classification_metrics(predictions, references):
+    #     precision_metric = evaluate.load("precision")
+    #     recall_metric = evaluate.load("recall")
+    #     accuracy_metric = evaluate.load("accuracy")
+    #     f1_metric = evaluate.load("f1")
 
-        # Generate binary labels for predictions
-        true_labels = [1 if pred == ref else 0 for pred, ref in zip(predictions, references)]
-
-        # Use binary classification metrics
-        precision = precision_metric.compute(predictions=true_labels, references=[1] * len(true_labels))
-        recall = recall_metric.compute(predictions=true_labels, references=[1] * len(true_labels))   
-        accuracy = accuracy_metric.compute(predictions=true_labels, references=[1] * len(true_labels))
-        f1 = f1_metric.compute(predictions=true_labels, references=[1] * len(true_labels))           
-
-        return {
-            "precision": precision,
-            "recall": recall,
-            "accuracy": accuracy,
-            "f1": f1
-        }
+    #     precision = precision_metric.compute(predictions=predictions, references=references)
+    #     recall = recall_metric.compute(predictions=predictions, references=references)
+    #     accuracy = accuracy_metric.compute(predictions=predictions, references=references)
+    #     f1 = f1_metric.compute(predictions=predictions, references=references)
+        
+    #     return {
+    #         "precision": precision['precision'],
+    #         "recall": recall['recall'],
+    #         "accuracy": accuracy['accuracy'],
+    #         "f1": f1['f1']
+    #     }
+    
+    def compute_meteor(predictions, references):
+        """
+        Computes the METEOR (Metric for Evaluation of Translation with Explicit Ordering) score.
+        Assumes predictions and references are strings (sequence-level).
+        """
+        meteor_metric = evaluate.load("meteor")
+        meteor = meteor_metric.compute(predictions=predictions, references=references)
+        return {"meteor": meteor['meteor']}
 
     # Compute perplexity
     def calculate_perplexity(probabilities):
         log_likelihood = -np.mean(np.log(probabilities.cpu().numpy()))
         return np.exp(log_likelihood)
 
+    print("Evaluating...")
     input_ids = tokenizer(references, return_tensors="pt", padding=True, truncation=True)["input_ids"].to(model.device)
     with torch.no_grad():
         outputs = model(input_ids)
@@ -84,10 +102,18 @@ def evaluate_model(dataset_name, model_name, subset_size=5):
         probabilities = torch.softmax(logits, dim=-1)
         perplexity = calculate_perplexity(probabilities)
 
-    # Return metrics
+    meteor_scores = compute_meteor(predictions, references)
+    rouge_scores = compute_rouge(predictions, references)
+    bleu_scores = compute_bleu(predictions, references)
+    
+    elapsed_time = time.time() - start_time
+    elapsed_minutes = elapsed_time / 60
+    print(f"Time taken for evaluation: {elapsed_minutes:.2f} minutes")
+
     return {
-        "rouge_scores": compute_rouge(predictions, references),
-        "bleu_scores": compute_bleu(predictions, references),
-        "classification_metrics": compute_classification_metrics(predictions, references),
+        # "classification_metrics": compute_classification_metrics(predictions, references),
+        "meteor_scores": meteor_scores,
+        "rouge_scores": rouge_scores,
+        "bleu_scores": bleu_scores,
         "perplexity": perplexity
     }
