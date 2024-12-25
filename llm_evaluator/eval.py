@@ -5,7 +5,7 @@ import evaluate
 import numpy as np
 import time
 
-def evaluate_model(dataset_name, model_name, max_length=512, subset_size=5):
+def evaluate_model(dataset_name, model_name, max_length=2048, subset_size=5):
     """_summary_
 
     Args:
@@ -19,10 +19,14 @@ def evaluate_model(dataset_name, model_name, max_length=512, subset_size=5):
     """
     start_time = time.time()
     
-    model = AutoModelForCausalLM.from_pretrained(model_name)
-    tokenizer = AutoTokenizer.from_pretrained(model_name)
+    if isinstance(model_name, str):
+        model = AutoModelForCausalLM.from_pretrained(model_name)
+        tokenizer = AutoTokenizer.from_pretrained(model_name)
+    else:
+        model = model_name
+        tokenizer = AutoTokenizer.from_pretrained(model.config.name_or_path)
+        
     dataset = load_dataset(dataset_name)
-    
     # Prepare dataset inputs
     def prepare_inputs(examples):
         return tokenizer(
@@ -35,7 +39,7 @@ def evaluate_model(dataset_name, model_name, max_length=512, subset_size=5):
 
     eval_dataset = dataset["train"].map(prepare_inputs, batched=True)
     eval_subset = eval_dataset.select(range(subset_size))
-
+    
     # Generate predictions
     def generate_predictions(batch):
         print("Generating predictions...")
