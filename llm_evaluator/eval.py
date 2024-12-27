@@ -48,8 +48,8 @@ def evaluate_model(dataset_name, model_name, max_length=2048, subset_size=5):
         with torch.no_grad():
             outputs = model.generate(
                 input_ids=input_ids, 
-                attention_mask=attention_mask, 
-                max_length=max_length
+                attention_mask=attention_mask,
+                max_new_tokens=200,
             )
         return tokenizer.batch_decode(outputs, skip_special_tokens=True)
 
