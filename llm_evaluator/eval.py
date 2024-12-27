@@ -4,6 +4,7 @@ from datasets import load_dataset
 import evaluate
 import numpy as np
 import time
+import gc
 
 def evaluate_model(dataset_name, model_name, max_length=2048, subset_size=5):
     """_summary_
@@ -114,6 +115,19 @@ def evaluate_model(dataset_name, model_name, max_length=2048, subset_size=5):
     elapsed_minutes = elapsed_time / 60
     print(f"Time taken for evaluation: {elapsed_minutes:.2f} minutes")
 
+    del predictions
+    del input_ids
+    del outputs
+    del logits
+    del probabilities
+    del references
+    del eval_dataset
+    del eval_subset
+    del dataset
+    
+    torch.cuda.empty_cache()  # For GPU memory management
+    gc.collect()  # For general garbage collection
+    
     return {
         # "classification_metrics": compute_classification_metrics(predictions, references),
         "meteor_scores": meteor_scores,
