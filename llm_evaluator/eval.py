@@ -28,6 +28,7 @@ def evaluate_model(dataset_name, model_name,token, max_length=2048, subset_size=
         tokenizer = AutoTokenizer.from_pretrained(model.config.name_or_path, token=token)
         
     dataset = load_dataset(dataset_name, token=token)
+    tokenizer.pad_token = tokenizer.eos_token
     # Prepare dataset inputs
     def prepare_inputs(examples):
         return tokenizer(
