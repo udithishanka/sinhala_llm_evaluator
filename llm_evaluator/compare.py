@@ -7,6 +7,7 @@ def compare_models(
     dataset_name: str,
     model1_name: str,
     model2_name: str,
+    token: str,
     max_length: int = 2048,
     subset_size: int = 5,
     output_plot: str = "model_comparison.png"
@@ -37,7 +38,8 @@ def compare_models(
         dataset_name=dataset_name,
         model_name=model1_name,
         max_length=max_length,
-        subset_size=subset_size
+        subset_size=subset_size,
+        token=token
     )
 
     print(f"\nEvaluating Model 2: {model2_name}")
@@ -45,7 +47,8 @@ def compare_models(
         dataset_name=dataset_name,
         model_name=model2_name,
         max_length=max_length,
-        subset_size=subset_size
+        subset_size=subset_size,
+        token=token
     )
 
     # Gather metrics in a consistent structure

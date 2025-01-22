@@ -2,7 +2,7 @@ from setuptools import setup, find_packages
 
 setup(
     name="sinhala_llm_evaluator",
-    version="0.3.1",  
+    version="0.3.2",  
     description="A module for evaluating language models during training",
     long_description=open("README.md").read(),
     long_description_content_type="text/markdown",
@@ -20,7 +20,8 @@ setup(
         "nltk",
         "absl-py",
         "rouge-score",
-        "scikit-learn"
+        "scikit-learn",
+        "matplotlib",
     ],
     classifiers=[
         "Programming Language :: Python :: 3",
