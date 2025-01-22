@@ -12,7 +12,7 @@ def evaluate_model(dataset_name, model_name, max_length=2048, subset_size=5):
     Args:
         dataset_name (_type_): _description_
         model_name (_type_): _description_
-        max_length (int, optional): _description_. Defaults to 512.
+        max_length (int, optional): _description_. Defaults to 2048.
         subset_size (int, optional): _description_. Defaults to 5.
 
     Returns:
@@ -125,8 +125,8 @@ def evaluate_model(dataset_name, model_name, max_length=2048, subset_size=5):
     del eval_subset
     del dataset
     
-    torch.cuda.empty_cache()  # For GPU memory management
-    gc.collect()  # For general garbage collection
+    torch.cuda.empty_cache()
+    gc.collect()
     
     return {
         # "classification_metrics": compute_classification_metrics(predictions, references),
