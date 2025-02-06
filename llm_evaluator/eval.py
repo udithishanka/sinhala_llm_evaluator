@@ -26,8 +26,7 @@ def evaluate_model(dataset_name, model_name,token, max_length=2048, subset_size=
     else:
         model = model_name
         tokenizer = AutoTokenizer.from_pretrained(model.config.name_or_path, token=token)
-        
-    dataset = load_dataset(dataset_name, token=token)
+    
     tokenizer.pad_token = tokenizer.eos_token
     # Prepare dataset inputs
     def prepare_inputs(examples):
@@ -38,9 +37,13 @@ def evaluate_model(dataset_name, model_name,token, max_length=2048, subset_size=
             max_length=max_length, 
             return_tensors="pt"
         )
-
-    eval_dataset = dataset["train"].map(prepare_inputs, batched=True)
-    eval_subset = eval_dataset.select(range(subset_size))
+    
+    if isinstance(dataset_name, str):
+        dataset = load_dataset(dataset_name, token=token)
+        eval_dataset = dataset["train"].map(prepare_inputs, batched=True)
+        eval_subset = eval_dataset.select(range(subset_size))
+    else:
+        eval_subset = dataset_name
     
     # Generate predictions
     def generate_predictions(batch):
