@@ -28,22 +28,30 @@ def evaluate_model(dataset_name, model_name,token, max_length=2048, subset_size=
         tokenizer = AutoTokenizer.from_pretrained(model.config.name_or_path, token=token)
     
     tokenizer.pad_token = tokenizer.eos_token
-    # Prepare dataset inputs
-    def prepare_inputs(examples):
-        return tokenizer(
-            examples["question"], 
-            truncation=True, 
-            padding="max_length", 
-            max_length=max_length, 
-            return_tensors="pt"
-        )
     
     if isinstance(dataset_name, str):
         dataset = load_dataset(dataset_name, token=token)
-        eval_dataset = dataset["train"].map(prepare_inputs, batched=True)
-        eval_subset = eval_dataset.select(range(subset_size))
+        dataset = dataset["train"]
     else:
-        eval_subset = dataset_name
+        dataset = dataset_name
+
+    sample = dataset[0]
+    if "input_ids" in sample and "attention_mask" in sample:
+        eval_dataset = dataset
+    else:
+        def prepare_inputs(examples):
+            return tokenizer(
+                examples["question"],
+                truncation=True,
+                padding="max_length",
+                max_length=max_length,
+                return_tensors="pt"
+            )
+
+        eval_dataset = dataset.map(prepare_inputs, batched=True)
+
+    subset_size = min(subset_size, len(eval_dataset))
+    eval_subset = eval_dataset.select(range(subset_size))
     
     # Generate predictions
     def generate_predictions(batch):
